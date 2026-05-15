@@ -35,6 +35,10 @@ class Directory_handle{
 
            while((entry = readdir(d)) != NULL){
 
+            if(strcmp(entry->d_name,".") == 0 || strcmp(entry->d_name, "..")==0){
+                continue;
+            }
+
             char fullpath[PATH_MAX];
 
             snprintf(fullpath, sizeof(fullpath),"%s/%s",path,entry->d_name);
