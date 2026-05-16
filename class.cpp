@@ -26,11 +26,14 @@ class Directory_handle{
         Directory_handle(const Directory_handle&) = delete;
         Directory_handle& operator=(const Directory_handle&) = delete;
 
-        void list_directory(const char* path){
-            DIR* d = opendir(path);
-            if(!d){
-                throw std::runtime_error(std::string("opendir failed. ") + strerror(errno));
-            }
+        
+
+};
+void list_directory(const char* path){
+            Directory_handle dh(path);
+            DIR* d = dh.get_ptr();
+
+          
             struct dirent* entry;
 
            while((entry = readdir(d)) != NULL){
@@ -46,21 +49,34 @@ class Directory_handle{
             struct stat st;
             
             if(lstat(fullpath,&st) == -1){
+                std::cerr << "path error " << strerror(errno) << std::endl;
                 continue;
             }
              if(S_ISDIR(st.st_mode)){
-                    std::cout << "[DIR] " << entry->d_name << std::endl;
+                    std::cout << "[DIR] " << entry->d_name<<" || "<< st.st_size << " bytes." << std::endl;
                 }
                 else if(S_ISREG(st.st_mode)){
-                    std::cout << "[FILE] " << entry->d_name <<std::endl;
+                    std::cout << "[FILE] " << entry->d_name<<" || "<< st.st_size << " bytes." <<std::endl;
 
                 }
                 else if (S_ISLNK(st.st_mode)){
-                    std::cout << "[LINK]\n";
+                    std::cout << "[LINK] "<< entry->d_name<< " || " <<st.st_size<<" bytes\n";
                 }
                 else std::cout << "Other\n";
            }
-           closedir(d);
+        //    Directory_handle f(path);
         }
+int main(int argc, char* argv[]){
+    if(argc < 2){
+        std::cerr << "Usage: filepath error\n";
 
-};
+        return 1;
+    }
+    try{
+        list_directory(argv[1]);
+    }
+    catch(const std::exception &e){
+        std::cerr << "Error " << e.what() << "\n";
+    }
+    
+}
